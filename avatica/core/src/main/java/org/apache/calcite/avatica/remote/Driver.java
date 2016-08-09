@@ -146,7 +146,7 @@ public class Driver extends UnregisteredDriver {
    * @param config The configuration.
    * @return An {@link AvaticaHttpClient} implementation.
    */
-  AvaticaHttpClient getHttpClient(AvaticaConnection connection, ConnectionConfig config) {
+  protected AvaticaHttpClient getHttpClient(AvaticaConnection connection, ConnectionConfig config) {
     URL url;
     try {
       url = new URL(config.url());
