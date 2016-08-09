@@ -144,7 +144,7 @@ public class AlternatingRemoteMetaTest {
       return new RemoteMeta(connection, service);
     }
 
-    @Override AvaticaHttpClient getHttpClient(AvaticaConnection connection,
+    @Override protected AvaticaHttpClient getHttpClient(AvaticaConnection connection,
         ConnectionConfig config) {
       return new AlternatingAvaticaHttpClient(parseUrls(config.url()));
     }
