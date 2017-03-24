@@ -22,10 +22,13 @@ import org.apache.calcite.avatica.ColumnMetaData;
 import org.apache.calcite.avatica.Meta;
 import org.apache.calcite.avatica.MetaImpl;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * A mock implementation of ProtobufService for testing.
@@ -34,11 +37,27 @@ import java.util.Map;
  */
 public class MockProtobufService extends ProtobufService {
 
+  /**
+   * Simple function so we don't need to depend on Guava here
+   *
+   * @param <INPUT> Type of the first parameter
+   * @param <INPUT2> Type of the second paramter
+   * @param <OUTPUT> Return type
+   */
+  public interface BiFunction<INPUT, INPUT2, OUTPUT> {
+    OUTPUT apply(INPUT in, INPUT2 in2);
+  }
+
+  public static final String TEST_RESPONSE_GROUP_PROPERTY_KEY = "test.response-group";
+  public static final Map<String, List<BiFunction<String, Request, Response>>> PER_ID_MAP =
+      new HashMap<>();
   private final String connectionId;
   private final Map<Request, Response> mapping;
+  private final String idKey;
 
-  public MockProtobufService(String connectionId) {
+  public MockProtobufService(String connectionId, String idKey) {
     this.connectionId = connectionId;
+    this.idKey = idKey;
     this.mapping = createMapping();
   }
 
@@ -77,7 +96,7 @@ public class MockProtobufService extends ProtobufService {
                 null, null, Meta.CursorFactory.ARRAY, Meta.StatementType.SELECT),
             Meta.Frame.create(0, true,
                 Arrays.<Object>asList(new Object[] {1, "a"},
-                    new Object[] {null, "b"}, new Object[] {3, "c"})), -1, null));
+                    new Object[] {null, "b"}, new Object[] {3, "c"}), null), -1, null));
 
     // Prepare a query. Schema for results are returned, but no values
     mappings.put(
@@ -101,7 +120,8 @@ public class MockProtobufService extends ProtobufService {
                     MetaImpl.columnMetaData("ORDINAL_POSITION", 1, Long.class, true)), null,
                 Collections.<AvaticaParameter>emptyList(), Meta.CursorFactory.ARRAY, null),
             Meta.Frame.create(0, true,
-                Arrays.<Object>asList(new Object[] {new Object[]{"my_table", 10}})), -1, null));
+                Arrays.<Object>asList(new Object[]{new Object[]{"my_table", 10}}), null), -1,
+            null));
 
     return Collections.unmodifiableMap(mappings);
   }
@@ -124,6 +144,18 @@ public class MockProtobufService extends ProtobufService {
   private Response dispatch(Request request) {
     Response response = mapping.get(request);
 
+    if (response == null) {
+      List<BiFunction<String, Request, Response>> list = PER_ID_MAP.get(idKey);
+      if (list != null) {
+        for (BiFunction<String, Request, Response> func : list) {
+          response = func.apply(connectionId, request);
+          if (response != null) {
+            break;
+          }
+        }
+      }
+    }
+
     if (null == response) {
       throw new RuntimeException("Had no response mapping for " + request);
     }
@@ -135,8 +167,17 @@ public class MockProtobufService extends ProtobufService {
    * A factory that instantiates the mock protobuf service.
    */
   public static class MockProtobufServiceFactory implements Service.Factory {
+
     @Override public Service create(AvaticaConnection connection) {
-      return new MockProtobufService(connection.id);
+      try {
+        Field metaF = AvaticaConnection.class.getDeclaredField("info");
+        metaF.setAccessible(true);
+        Properties props = (Properties) metaF.get(connection);
+        return new MockProtobufService(connection.id,
+            props.getProperty(TEST_RESPONSE_GROUP_PROPERTY_KEY));
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 }

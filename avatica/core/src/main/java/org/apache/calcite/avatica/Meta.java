@@ -203,7 +203,7 @@ public interface Meta {
    * requires to be not null; derived classes may instead choose to execute the
    * relational expression in {@code signature}. */
   Iterable<Object> createIterable(StatementHandle stmt, QueryState state, Signature signature,
-      List<TypedValue> parameterValues, Frame firstFrame);
+      List<TypedValue> parameterValues, Frame firstFrame, ResetCursorCallback reset);
 
   /** Prepares a statement.
    *
@@ -901,21 +901,29 @@ public interface Meta {
     public final boolean done;
     /** The rows. */
     public final Iterable<Object> rows;
+    /** signature for the next batch of rows*/
+    public final Signature nextSignature;
 
     public Frame(long offset, boolean done, Iterable<Object> rows) {
+      this(offset, done, rows, null);
+    }
+
+    public Frame(long offset, boolean done, Iterable<Object> rows, Signature nextSignature) {
       this.offset = offset;
       this.done = done;
       this.rows = rows;
+      this.nextSignature = nextSignature;
     }
 
     @JsonCreator
     public static Frame create(@JsonProperty("offset") int offset,
         @JsonProperty("done") boolean done,
-        @JsonProperty("rows") List<Object> rows) {
+        @JsonProperty("rows") List<Object> rows,
+        @JsonProperty("signature") Signature signature) {
       if (offset == 0 && done && rows.isEmpty()) {
         return EMPTY;
       }
-      return new Frame(offset, done, rows);
+      return new Frame(offset, done, rows, signature);
     }
 
     public Common.Frame toProto() {
@@ -965,6 +973,10 @@ public interface Meta {
           // Can a "row" be a primitive? A struct? Only an Array?
           throw new RuntimeException("Only arrays are supported");
         }
+      }
+
+      if (nextSignature != null) {
+        builder.setUpdatedSignature(this.nextSignature.toProto());
       }
 
       return builder.build();
@@ -1307,6 +1319,13 @@ public interface Meta {
     void assign(Signature signature, Frame firstFrame, long updateCount)
         throws SQLException;
     void execute() throws SQLException;
+  }
+
+  /**
+   * Callback for notifications when get a frame signature change
+   */
+  interface ResetCursorCallback {
+    void reset(Signature signatureUpdate);
   }
 
   /** Type of statement. */

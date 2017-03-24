@@ -19,6 +19,7 @@ package org.apache.calcite.avatica;
 import org.apache.calcite.avatica.remote.TypedValue;
 import org.apache.calcite.avatica.util.ArrayImpl;
 import org.apache.calcite.avatica.util.Cursor;
+import org.apache.calcite.avatica.util.IteratorCursor;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -39,6 +40,7 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -53,10 +55,10 @@ public class AvaticaResultSet implements ResultSet, ArrayImpl.Factory {
   protected final Meta.Signature signature;
   protected final Meta.Frame firstFrame;
   protected final List<ColumnMetaData> columnMetaDataList;
-  protected final ResultSetMetaData resultSetMetaData;
+  protected ResultSetMetaData resultSetMetaData;
   protected final Calendar localCalendar;
 
-  protected Cursor cursor;
+  protected IteratorCursor cursor;
   protected List<Cursor.Accessor> accessorList;
   private int row;
   private boolean afterLast;
@@ -68,6 +70,7 @@ public class AvaticaResultSet implements ResultSet, ArrayImpl.Factory {
   private boolean closed;
   private long timeoutMillis;
   private Cursor timeoutCursor;
+  private Meta.Signature updateSignature;
 
   /** Creates an {@link AvaticaResultSet}. */
   public AvaticaResultSet(AvaticaStatement statement,
@@ -192,7 +195,11 @@ public class AvaticaResultSet implements ResultSet, ArrayImpl.Factory {
     final List<TypedValue> parameterValues = statement.getBoundParameterValues();
     final Iterable<Object> iterable1 =
         statement.connection.meta.createIterable(statement.handle, state, signature,
-            parameterValues, firstFrame);
+            parameterValues, firstFrame, new Meta.ResetCursorCallback() {
+              @Override public void reset(Meta.Signature signatureUpdate) {
+                AvaticaResultSet.this.resetCursor(signatureUpdate);
+              }
+            });
     this.cursor = MetaImpl.createCursor(signature.cursorFactory, iterable1);
     this.accessorList =
         cursor.createAccessors(columnMetaDataList, localCalendar, this);
@@ -201,9 +208,41 @@ public class AvaticaResultSet implements ResultSet, ArrayImpl.Factory {
     return this;
   }
 
+  protected void resetCursor(Meta.Signature signature) {
+    this.updateSignature = signature;
+  }
+
+  private void updateSignature() {
+    // ensure we reset the signature, otherwise this gets repeated every next(), so do it first
+    Meta.Signature signature = this.updateSignature;
+    this.updateSignature = null;
+
+    // replace the current statement
+    this.statement.setSignature(signature);
+
+    // create a new cursor at the same position
+    IteratorCursor prev = this.cursor;
+    this.cursor = MetaImpl.createCursor(signature.cursorFactory, new Iterable<Object>() {
+      @Override public Iterator<Object> iterator() {
+        return AvaticaResultSet.this.cursor.getIterator();
+      }
+    });
+    prev.cloneTo(this.cursor);
+
+    // and the accessors for the columns
+    this.columnMetaDataList.clear();
+    this.columnMetaDataList.addAll(signature.columns);
+    this.accessorList =
+        cursor.createAccessors(columnMetaDataList, localCalendar, this);
+
+    // metadata needs to be updated to reflect the new signature
+    AvaticaResultSetMetaData md = (AvaticaResultSetMetaData) this.resultSetMetaData;
+    this.resultSetMetaData = new AvaticaResultSetMetaData(md.statement, md.query, signature);
+  }
+
   protected AvaticaResultSet execute2(Cursor cursor,
       List<ColumnMetaData> columnMetaDataList) {
-    this.cursor = cursor;
+    this.cursor = (IteratorCursor) cursor;
     this.accessorList =
         cursor.createAccessors(columnMetaDataList, localCalendar, this);
     this.row = -1;
@@ -226,6 +265,9 @@ public class AvaticaResultSet implements ResultSet, ArrayImpl.Factory {
     }
     if (cursor.next()) {
       ++row;
+      if (this.updateSignature != null) {
+        this.updateSignature();
+      }
       return true;
     } else {
       afterLast = true;

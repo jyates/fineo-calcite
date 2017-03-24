@@ -18,7 +18,6 @@ package org.apache.calcite.avatica;
 
 import org.apache.calcite.avatica.remote.TypedValue;
 import org.apache.calcite.avatica.util.ArrayIteratorCursor;
-import org.apache.calcite.avatica.util.Cursor;
 import org.apache.calcite.avatica.util.IteratorCursor;
 import org.apache.calcite.avatica.util.ListIteratorCursor;
 import org.apache.calcite.avatica.util.MapIteratorCursor;
@@ -74,7 +73,7 @@ public abstract class MetaImpl implements Meta {
   /** Uses a {@link org.apache.calcite.avatica.Meta.CursorFactory} to convert
    * an {@link Iterable} into a
    * {@link org.apache.calcite.avatica.util.Cursor}. */
-  public static Cursor createCursor(CursorFactory cursorFactory,
+  public static IteratorCursor createCursor(CursorFactory cursorFactory,
       Iterable<Object> iterable) {
     switch (cursorFactory.style) {
     case OBJECT:
@@ -1447,7 +1446,8 @@ public abstract class MetaImpl implements Meta {
   }
 
   @Override public Iterable<Object> createIterable(StatementHandle handle, QueryState state,
-      Signature signature, List<TypedValue> parameterValues, Frame firstFrame) {
+      Signature signature, List<TypedValue> parameterValues, Frame firstFrame,
+      ResetCursorCallback reset) {
     if (firstFrame != null && firstFrame.done) {
       return firstFrame.rows;
     }
@@ -1458,7 +1458,7 @@ public abstract class MetaImpl implements Meta {
       throw new RuntimeException(e);
     }
     return new FetchIterable(stmt, state,
-        firstFrame, parameterValues);
+        firstFrame, parameterValues, reset);
   }
 
   public Frame fetch(AvaticaStatement stmt, List<TypedValue> parameterValues,
@@ -1528,17 +1528,19 @@ public abstract class MetaImpl implements Meta {
     private final QueryState state;
     private final Frame firstFrame;
     private final List<TypedValue> parameterValues;
+    private final ResetCursorCallback reset;
 
     public FetchIterable(AvaticaStatement stmt, QueryState state, Frame firstFrame,
-        List<TypedValue> parameterValues) {
+        List<TypedValue> parameterValues, ResetCursorCallback reset) {
       this.stmt = stmt;
       this.state = state;
       this.firstFrame = firstFrame;
       this.parameterValues = parameterValues;
+      this.reset = reset;
     }
 
     public Iterator<Object> iterator() {
-      return new FetchIterator(stmt, state, firstFrame, parameterValues);
+      return new FetchIterator(stmt, state, firstFrame, parameterValues, reset);
     }
   }
 
@@ -1546,14 +1548,18 @@ public abstract class MetaImpl implements Meta {
   private class FetchIterator implements Iterator<Object> {
     private final AvaticaStatement stmt;
     private final QueryState state;
+    private final ResetCursorCallback reset;
     private Frame frame;
     private Iterator<Object> rows;
     private List<TypedValue> parameterValues;
     private List<TypedValue> originalParameterValues;
     private long currentOffset = 0;
+    private boolean checkSignature = false;
+    private Iterator<Object> currentRows = null;
 
     public FetchIterator(AvaticaStatement stmt, QueryState state, Frame firstFrame,
-        List<TypedValue> parameterValues) {
+        List<TypedValue> parameterValues, ResetCursorCallback reset) {
+      this.reset = reset;
       this.stmt = stmt;
       this.state = state;
       this.parameterValues = parameterValues;
@@ -1580,21 +1586,32 @@ public abstract class MetaImpl implements Meta {
       if (rows == null) {
         throw new NoSuchElementException();
       }
-      final Object o = rows.next();
+
+      Object o = rows.next();
+      if (o instanceof SignatureMarker) {
+        this.reset.reset(((SignatureMarker) o).signature);
+        o = rows.next();
+      }
       currentOffset++;
+
       moveNext();
       return o;
     }
 
     private void moveNext() {
+      Signature lastSignature = frame.nextSignature;
       for (;;) {
+        // we have some rows, don't try and get more
         if (rows.hasNext()) {
           break;
         }
+
+        // the current frame is complete, don't try and get more rows
         if (frame.done) {
           rows = null;
           break;
         }
+
         try {
           // currentOffset updated after element is read from `rows` iterator
           frame = fetch(stmt.handle, currentOffset, AvaticaStatement.DEFAULT_FETCH_SIZE);
@@ -1625,9 +1642,27 @@ public abstract class MetaImpl implements Meta {
           rows = null;
           break;
         }
-        // It is valid for rows to be empty, so we go around the loop again to
-        // check
         rows = frame.rows.iterator();
+        if (rows.hasNext()) {
+          if (lastSignature != null) {
+            rows = concat(new SignatureMarker(lastSignature), rows);
+          }
+          break;
+        }
+        // we just got an empty frame for a new signature. weird, but ok. grab that for the next
+        // go around
+        lastSignature = frame.nextSignature;
+      }
+    }
+
+    /**
+     * Inner-class so we know that the row element can definitely not be of this type, ever.
+     */
+    private class SignatureMarker {
+      public final Signature signature;
+
+      private SignatureMarker(Signature signature) {
+        this.signature = signature;
       }
     }
 
@@ -1637,6 +1672,35 @@ public abstract class MetaImpl implements Meta {
       // Defer to the statement to reset itself
       stmt.resetStatement();
     }
+  }
+
+  private Iterator<Object> concat(final Object first, final Iterator<Object> next) {
+    return new Iterator<Object>() {
+      private boolean usedFirst = false;
+
+      @Override public boolean hasNext() {
+        if (usedFirst) {
+          return next.hasNext();
+        }
+        return true;
+      }
+
+      @Override public Object next() {
+        if (usedFirst) {
+          return next.next();
+        }
+        usedFirst = true;
+        return first;
+      }
+
+      @Override public void remove() {
+        if (usedFirst) {
+          next.remove();
+        } else {
+          usedFirst = true;
+        }
+      }
+    };
   }
 
   /** Returns whether a list of parameter values has any null elements. */

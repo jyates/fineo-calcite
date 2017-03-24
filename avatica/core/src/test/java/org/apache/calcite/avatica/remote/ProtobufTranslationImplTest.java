@@ -302,12 +302,16 @@ public class ProtobufTranslationImplTest<T> {
     // Create the signature and frame using the metadata and values
     Signature signature = Signature.create(columns, "sql", params, cursorFactory,
         Meta.StatementType.SELECT);
-    Frame frame = Frame.create(Integer.MAX_VALUE, true, rows);
+    Frame frame = Frame.create(Integer.MAX_VALUE, true, rows, null);
+    Frame frameWithSignature = Frame.create(Integer.MAX_VALUE, true, rows, null);
 
     // And then create a ResultSetResponse
     ResultSetResponse results1 = new ResultSetResponse("connectionId", Integer.MAX_VALUE, true,
         signature, frame, Long.MAX_VALUE, rpcMetadata);
     responses.add(results1);
+    ResultSetResponse results2 = new ResultSetResponse("connectionId", Integer.MAX_VALUE, true,
+        signature, frameWithSignature, Long.MAX_VALUE, rpcMetadata);
+    responses.add(results2);
 
     responses.add(new CloseStatementResponse(rpcMetadata));
 
@@ -331,6 +335,7 @@ public class ProtobufTranslationImplTest<T> {
     responses.add(new FetchResponse(frame, false, false, rpcMetadata));
     responses.add(new FetchResponse(frame, true, true, rpcMetadata));
     responses.add(new FetchResponse(frame, false, true, rpcMetadata));
+    responses.add(new FetchResponse(frameWithSignature, false, true, rpcMetadata));
     responses.add(
         new PrepareResponse(
             new Meta.StatementHandle("connectionId", Integer.MAX_VALUE, signature),

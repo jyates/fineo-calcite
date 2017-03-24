@@ -161,6 +161,7 @@ message Frame {
   uint64 offset = 1;
   bool done = 2;
   repeated Row rows = 3;
+  Signature updatedSignature = 4;
 }
 
 // A row is a collection of values

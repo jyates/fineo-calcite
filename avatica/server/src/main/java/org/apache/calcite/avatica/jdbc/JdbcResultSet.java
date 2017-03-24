@@ -116,12 +116,16 @@ class JdbcResultSet extends Meta.MetaResultSet {
    * from a result set. */
   static Meta.Frame frame(StatementInfo info, ResultSet resultSet, long offset,
       int fetchMaxRowCount, Calendar calendar) throws SQLException {
+    // result set can change from row to row, so just get the frame that matches the current
+    // result set number/value of columns
     final ResultSetMetaData metaData = resultSet.getMetaData();
+    final FrameCheck check = new FrameCheck(metaData);
     final int columnCount = metaData.getColumnCount();
     final int[] types = new int[columnCount];
     for (int i = 0; i < types.length; i++) {
       types[i] = metaData.getColumnType(i + 1);
     }
+    boolean updateMetadata = false;
     final List<Object> rows = new ArrayList<>();
     // Meta prepare/prepareAndExecute 0 return 0 row and done
     boolean done = fetchMaxRowCount == 0;
@@ -137,13 +141,49 @@ class JdbcResultSet extends Meta.MetaResultSet {
         resultSet.close();
         break;
       }
+      // if the metadata changes, we should end the frame and start a new one.
+      if (check.endFrame(resultSet)) {
+        updateMetadata = true;
+        break;
+      }
       Object[] columns = new Object[columnCount];
       for (int j = 0; j < columnCount; j++) {
         columns[j] = getValue(resultSet, types[j], j, calendar);
       }
       rows.add(columns);
     }
-    return new Meta.Frame(offset, done, rows);
+    return new Meta.Frame(offset, done, rows,
+        updateMetadata ? JdbcMeta.signature(resultSet.getMetaData()) : null);
+  }
+
+  /**
+   * Check if the frame needs to be stopped and a new one started
+   */
+  private static class FrameCheck {
+    private ResultSetMetaData meta;
+
+    public FrameCheck(ResultSetMetaData meta) {
+      this.meta = meta;
+    }
+
+    public boolean endFrame(ResultSet rs) throws SQLException {
+      ResultSetMetaData meta = rs.getMetaData();
+      if (meta == this.meta) {
+        return false;
+      }
+
+      if (meta.getColumnCount() != this.meta.getColumnCount()) {
+        return true;
+      }
+
+      // same number of columns, maybe we got a difference in the column names
+      for (int i = 0; i < this.meta.getColumnCount(); i++) {
+        if (!this.meta.getColumnName(i).equals(meta.getColumnName(i))) {
+          return true;
+        }
+      }
+      return false;
+    }
   }
 
   private static Object getValue(ResultSet resultSet, int type, int j,

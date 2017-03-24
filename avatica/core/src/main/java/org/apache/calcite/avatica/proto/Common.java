@@ -10103,6 +10103,19 @@ package org.apache.calcite.avatica.proto;
      */
     org.apache.calcite.avatica.proto.Common.RowOrBuilder getRowsOrBuilder(
         int index);
+
+    /**
+     * <code>optional .Signature updatedSignature = 4;</code>
+     */
+    boolean hasUpdatedSignature();
+    /**
+     * <code>optional .Signature updatedSignature = 4;</code>
+     */
+    org.apache.calcite.avatica.proto.Common.Signature getUpdatedSignature();
+    /**
+     * <code>optional .Signature updatedSignature = 4;</code>
+     */
+    org.apache.calcite.avatica.proto.Common.SignatureOrBuilder getUpdatedSignatureOrBuilder();
   }
   /**
    * <pre>
@@ -10167,6 +10180,19 @@ package org.apache.calcite.avatica.proto;
               }
               rows_.add(
                   input.readMessage(org.apache.calcite.avatica.proto.Common.Row.parser(), extensionRegistry));
+              break;
+            }
+            case 34: {
+              org.apache.calcite.avatica.proto.Common.Signature.Builder subBuilder = null;
+              if (updatedSignature_ != null) {
+                subBuilder = updatedSignature_.toBuilder();
+              }
+              updatedSignature_ = input.readMessage(org.apache.calcite.avatica.proto.Common.Signature.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(updatedSignature_);
+                updatedSignature_ = subBuilder.buildPartial();
+              }
+
               break;
             }
           }
@@ -10249,6 +10275,27 @@ package org.apache.calcite.avatica.proto;
       return rows_.get(index);
     }
 
+    public static final int UPDATEDSIGNATURE_FIELD_NUMBER = 4;
+    private org.apache.calcite.avatica.proto.Common.Signature updatedSignature_;
+    /**
+     * <code>optional .Signature updatedSignature = 4;</code>
+     */
+    public boolean hasUpdatedSignature() {
+      return updatedSignature_ != null;
+    }
+    /**
+     * <code>optional .Signature updatedSignature = 4;</code>
+     */
+    public org.apache.calcite.avatica.proto.Common.Signature getUpdatedSignature() {
+      return updatedSignature_ == null ? org.apache.calcite.avatica.proto.Common.Signature.getDefaultInstance() : updatedSignature_;
+    }
+    /**
+     * <code>optional .Signature updatedSignature = 4;</code>
+     */
+    public org.apache.calcite.avatica.proto.Common.SignatureOrBuilder getUpdatedSignatureOrBuilder() {
+      return getUpdatedSignature();
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -10270,6 +10317,9 @@ package org.apache.calcite.avatica.proto;
       for (int i = 0; i < rows_.size(); i++) {
         output.writeMessage(3, rows_.get(i));
       }
+      if (updatedSignature_ != null) {
+        output.writeMessage(4, getUpdatedSignature());
+      }
     }
 
     public int getSerializedSize() {
@@ -10288,6 +10338,10 @@ package org.apache.calcite.avatica.proto;
       for (int i = 0; i < rows_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, rows_.get(i));
+      }
+      if (updatedSignature_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getUpdatedSignature());
       }
       memoizedSize = size;
       return size;
@@ -10311,6 +10365,11 @@ package org.apache.calcite.avatica.proto;
           == other.getDone());
       result = result && getRowsList()
           .equals(other.getRowsList());
+      result = result && (hasUpdatedSignature() == other.hasUpdatedSignature());
+      if (hasUpdatedSignature()) {
+        result = result && getUpdatedSignature()
+            .equals(other.getUpdatedSignature());
+      }
       return result;
     }
 
@@ -10330,6 +10389,10 @@ package org.apache.calcite.avatica.proto;
       if (getRowsCount() > 0) {
         hash = (37 * hash) + ROWS_FIELD_NUMBER;
         hash = (53 * hash) + getRowsList().hashCode();
+      }
+      if (hasUpdatedSignature()) {
+        hash = (37 * hash) + UPDATEDSIGNATURE_FIELD_NUMBER;
+        hash = (53 * hash) + getUpdatedSignature().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -10464,6 +10527,12 @@ package org.apache.calcite.avatica.proto;
         } else {
           rowsBuilder_.clear();
         }
+        if (updatedSignatureBuilder_ == null) {
+          updatedSignature_ = null;
+        } else {
+          updatedSignature_ = null;
+          updatedSignatureBuilder_ = null;
+        }
         return this;
       }
 
@@ -10498,6 +10567,11 @@ package org.apache.calcite.avatica.proto;
           result.rows_ = rows_;
         } else {
           result.rows_ = rowsBuilder_.build();
+        }
+        if (updatedSignatureBuilder_ == null) {
+          result.updatedSignature_ = updatedSignature_;
+        } else {
+          result.updatedSignature_ = updatedSignatureBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -10572,6 +10646,9 @@ package org.apache.calcite.avatica.proto;
               rowsBuilder_.addAllMessages(other.rows_);
             }
           }
+        }
+        if (other.hasUpdatedSignature()) {
+          mergeUpdatedSignature(other.getUpdatedSignature());
         }
         onChanged();
         return this;
@@ -10890,6 +10967,123 @@ package org.apache.calcite.avatica.proto;
           rows_ = null;
         }
         return rowsBuilder_;
+      }
+
+      private org.apache.calcite.avatica.proto.Common.Signature updatedSignature_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          org.apache.calcite.avatica.proto.Common.Signature, org.apache.calcite.avatica.proto.Common.Signature.Builder, org.apache.calcite.avatica.proto.Common.SignatureOrBuilder> updatedSignatureBuilder_;
+      /**
+       * <code>optional .Signature updatedSignature = 4;</code>
+       */
+      public boolean hasUpdatedSignature() {
+        return updatedSignatureBuilder_ != null || updatedSignature_ != null;
+      }
+      /**
+       * <code>optional .Signature updatedSignature = 4;</code>
+       */
+      public org.apache.calcite.avatica.proto.Common.Signature getUpdatedSignature() {
+        if (updatedSignatureBuilder_ == null) {
+          return updatedSignature_ == null ? org.apache.calcite.avatica.proto.Common.Signature.getDefaultInstance() : updatedSignature_;
+        } else {
+          return updatedSignatureBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .Signature updatedSignature = 4;</code>
+       */
+      public Builder setUpdatedSignature(org.apache.calcite.avatica.proto.Common.Signature value) {
+        if (updatedSignatureBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          updatedSignature_ = value;
+          onChanged();
+        } else {
+          updatedSignatureBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>optional .Signature updatedSignature = 4;</code>
+       */
+      public Builder setUpdatedSignature(
+          org.apache.calcite.avatica.proto.Common.Signature.Builder builderForValue) {
+        if (updatedSignatureBuilder_ == null) {
+          updatedSignature_ = builderForValue.build();
+          onChanged();
+        } else {
+          updatedSignatureBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>optional .Signature updatedSignature = 4;</code>
+       */
+      public Builder mergeUpdatedSignature(org.apache.calcite.avatica.proto.Common.Signature value) {
+        if (updatedSignatureBuilder_ == null) {
+          if (updatedSignature_ != null) {
+            updatedSignature_ =
+              org.apache.calcite.avatica.proto.Common.Signature.newBuilder(updatedSignature_).mergeFrom(value).buildPartial();
+          } else {
+            updatedSignature_ = value;
+          }
+          onChanged();
+        } else {
+          updatedSignatureBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>optional .Signature updatedSignature = 4;</code>
+       */
+      public Builder clearUpdatedSignature() {
+        if (updatedSignatureBuilder_ == null) {
+          updatedSignature_ = null;
+          onChanged();
+        } else {
+          updatedSignature_ = null;
+          updatedSignatureBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>optional .Signature updatedSignature = 4;</code>
+       */
+      public org.apache.calcite.avatica.proto.Common.Signature.Builder getUpdatedSignatureBuilder() {
+
+        onChanged();
+        return getUpdatedSignatureFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .Signature updatedSignature = 4;</code>
+       */
+      public org.apache.calcite.avatica.proto.Common.SignatureOrBuilder getUpdatedSignatureOrBuilder() {
+        if (updatedSignatureBuilder_ != null) {
+          return updatedSignatureBuilder_.getMessageOrBuilder();
+        } else {
+          return updatedSignature_ == null ?
+              org.apache.calcite.avatica.proto.Common.Signature.getDefaultInstance() : updatedSignature_;
+        }
+      }
+      /**
+       * <code>optional .Signature updatedSignature = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          org.apache.calcite.avatica.proto.Common.Signature, org.apache.calcite.avatica.proto.Common.Signature.Builder, org.apache.calcite.avatica.proto.Common.SignatureOrBuilder>
+          getUpdatedSignatureFieldBuilder() {
+        if (updatedSignatureBuilder_ == null) {
+          updatedSignatureBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              org.apache.calcite.avatica.proto.Common.Signature, org.apache.calcite.avatica.proto.Common.Signature.Builder, org.apache.calcite.avatica.proto.Common.SignatureOrBuilder>(
+                  getUpdatedSignature(),
+                  getParentForChildren(),
+                  isClean());
+          updatedSignature_ = null;
+        }
+        return updatedSignatureBuilder_;
       }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -18166,66 +18360,67 @@ package org.apache.calcite.avatica.proto;
       "lass_name\030\002 \001(\t\022\023\n\013field_names\030\003 \003(\t\"T\n\005" +
       "Style\022\n\n\006OBJECT\020\000\022\n\n\006RECORD\020\001\022\025\n\021RECORD_" +
       "PROJECTION\020\002\022\t\n\005ARRAY\020\003\022\010\n\004LIST\020\004\022\007\n\003MAP" +
-      "\020\005\"9\n\005Frame\022\016\n\006offset\030\001 \001(\004\022\014\n\004done\030\002 \001(" +
-      "\010\022\022\n\004rows\030\003 \003(\0132\004.Row\"\"\n\003Row\022\033\n\005value\030\001 " +
-      "\003(\0132\014.ColumnValue\"3\n\020DatabaseProperty\022\014\n" +
-      "\004name\030\001 \001(\t\022\021\n\tfunctions\030\002 \003(\t\"4\n\013WireMe" +
-      "ssage\022\014\n\004name\030\001 \001(\t\022\027\n\017wrapped_message\030\002" +
-      " \001(\014\"\207\001\n\013ColumnValue\022\032\n\005value\030\001 \003(\0132\013.Ty",
-      "pedValue\022 \n\013array_value\030\002 \003(\0132\013.TypedVal" +
-      "ue\022\027\n\017has_array_value\030\003 \001(\010\022!\n\014scalar_va" +
-      "lue\030\004 \001(\0132\013.TypedValue\"\231\001\n\nTypedValue\022\022\n" +
-      "\004type\030\001 \001(\0162\004.Rep\022\022\n\nbool_value\030\002 \001(\010\022\024\n" +
-      "\014string_value\030\003 \001(\t\022\024\n\014number_value\030\004 \001(" +
-      "\022\022\023\n\013bytes_value\030\005 \001(\014\022\024\n\014double_value\030\006" +
-      " \001(\001\022\014\n\004null\030\007 \001(\010\"\246\002\n\031MetaDataOperation" +
-      "Argument\022\024\n\014string_value\030\001 \001(\t\022\022\n\nbool_v" +
-      "alue\030\002 \001(\010\022\021\n\tint_value\030\003 \001(\021\022\033\n\023string_" +
-      "array_values\030\004 \003(\t\022\030\n\020int_array_values\030\005",
-      " \003(\021\0225\n\004type\030\006 \001(\0162\'.MetaDataOperationAr" +
-      "gument.ArgumentType\"^\n\014ArgumentType\022\n\n\006S" +
-      "TRING\020\000\022\010\n\004BOOL\020\001\022\007\n\003INT\020\002\022\023\n\017REPEATED_S" +
-      "TRING\020\003\022\020\n\014REPEATED_INT\020\004\022\010\n\004NULL\020\005\"\260\001\n\n" +
-      "QueryState\022\030\n\004type\030\001 \001(\0162\n.StateType\022\013\n\003" +
-      "sql\030\002 \001(\t\022\036\n\002op\030\003 \001(\0162\022.MetaDataOperatio" +
-      "n\022(\n\004args\030\004 \003(\0132\032.MetaDataOperationArgum" +
-      "ent\022\020\n\010has_args\030\005 \001(\010\022\017\n\007has_sql\030\006 \001(\010\022\016" +
-      "\n\006has_op\030\007 \001(\010*\237\001\n\rStatementType\022\n\n\006SELE" +
-      "CT\020\000\022\n\n\006INSERT\020\001\022\n\n\006UPDATE\020\002\022\n\n\006DELETE\020\003",
-      "\022\n\n\006UPSERT\020\004\022\t\n\005MERGE\020\005\022\r\n\tOTHER_DML\020\006\022\n" +
-      "\n\006CREATE\020\007\022\010\n\004DROP\020\010\022\t\n\005ALTER\020\t\022\r\n\tOTHER" +
-      "_DDL\020\n\022\010\n\004CALL\020\013*\342\003\n\003Rep\022\025\n\021PRIMITIVE_BO" +
-      "OLEAN\020\000\022\022\n\016PRIMITIVE_BYTE\020\001\022\022\n\016PRIMITIVE" +
-      "_CHAR\020\002\022\023\n\017PRIMITIVE_SHORT\020\003\022\021\n\rPRIMITIV" +
-      "E_INT\020\004\022\022\n\016PRIMITIVE_LONG\020\005\022\023\n\017PRIMITIVE" +
-      "_FLOAT\020\006\022\024\n\020PRIMITIVE_DOUBLE\020\007\022\013\n\007BOOLEA" +
-      "N\020\010\022\010\n\004BYTE\020\t\022\r\n\tCHARACTER\020\n\022\t\n\005SHORT\020\013\022" +
-      "\013\n\007INTEGER\020\014\022\010\n\004LONG\020\r\022\t\n\005FLOAT\020\016\022\n\n\006DOU" +
-      "BLE\020\017\022\017\n\013BIG_INTEGER\020\031\022\017\n\013BIG_DECIMAL\020\032\022",
-      "\021\n\rJAVA_SQL_TIME\020\020\022\026\n\022JAVA_SQL_TIMESTAMP" +
-      "\020\021\022\021\n\rJAVA_SQL_DATE\020\022\022\022\n\016JAVA_UTIL_DATE\020" +
-      "\023\022\017\n\013BYTE_STRING\020\024\022\n\n\006STRING\020\025\022\n\n\006NUMBER" +
-      "\020\026\022\n\n\006OBJECT\020\027\022\010\n\004NULL\020\030\022\t\n\005ARRAY\020\033\022\n\n\006S" +
-      "TRUCT\020\034\022\014\n\010MULTISET\020\035*^\n\010Severity\022\024\n\020UNK" +
-      "NOWN_SEVERITY\020\000\022\022\n\016FATAL_SEVERITY\020\001\022\022\n\016E" +
-      "RROR_SEVERITY\020\002\022\024\n\020WARNING_SEVERITY\020\003*\327\004" +
-      "\n\021MetaDataOperation\022\022\n\016GET_ATTRIBUTES\020\000\022" +
-      "\033\n\027GET_BEST_ROW_IDENTIFIER\020\001\022\020\n\014GET_CATA" +
-      "LOGS\020\002\022\036\n\032GET_CLIENT_INFO_PROPERTIES\020\003\022\031",
-      "\n\025GET_COLUMN_PRIVILEGES\020\004\022\017\n\013GET_COLUMNS" +
-      "\020\005\022\027\n\023GET_CROSS_REFERENCE\020\006\022\025\n\021GET_EXPOR" +
-      "TED_KEYS\020\007\022\030\n\024GET_FUNCTION_COLUMNS\020\010\022\021\n\r" +
-      "GET_FUNCTIONS\020\t\022\025\n\021GET_IMPORTED_KEYS\020\n\022\022" +
-      "\n\016GET_INDEX_INFO\020\013\022\024\n\020GET_PRIMARY_KEYS\020\014" +
-      "\022\031\n\025GET_PROCEDURE_COLUMNS\020\r\022\022\n\016GET_PROCE" +
-      "DURES\020\016\022\026\n\022GET_PSEUDO_COLUMNS\020\017\022\017\n\013GET_S" +
-      "CHEMAS\020\020\022\031\n\025GET_SCHEMAS_WITH_ARGS\020\021\022\024\n\020G" +
-      "ET_SUPER_TABLES\020\022\022\023\n\017GET_SUPER_TYPES\020\023\022\030" +
-      "\n\024GET_TABLE_PRIVILEGES\020\024\022\016\n\nGET_TABLES\020\025",
-      "\022\023\n\017GET_TABLE_TYPES\020\026\022\021\n\rGET_TYPE_INFO\020\027" +
-      "\022\014\n\010GET_UDTS\020\030\022\027\n\023GET_VERSION_COLUMNS\020\031*" +
-      "\"\n\tStateType\022\007\n\003SQL\020\000\022\014\n\010METADATA\020\001B\"\n o" +
-      "rg.apache.calcite.avatica.protob\006proto3"
+      "\020\005\"_\n\005Frame\022\016\n\006offset\030\001 \001(\004\022\014\n\004done\030\002 \001(" +
+      "\010\022\022\n\004rows\030\003 \003(\0132\004.Row\022$\n\020updatedSignatur" +
+      "e\030\004 \001(\0132\n.Signature\"\"\n\003Row\022\033\n\005value\030\001 \003(" +
+      "\0132\014.ColumnValue\"3\n\020DatabaseProperty\022\014\n\004n" +
+      "ame\030\001 \001(\t\022\021\n\tfunctions\030\002 \003(\t\"4\n\013WireMess" +
+      "age\022\014\n\004name\030\001 \001(\t\022\027\n\017wrapped_message\030\002 \001",
+      "(\014\"\207\001\n\013ColumnValue\022\032\n\005value\030\001 \003(\0132\013.Type" +
+      "dValue\022 \n\013array_value\030\002 \003(\0132\013.TypedValue" +
+      "\022\027\n\017has_array_value\030\003 \001(\010\022!\n\014scalar_valu" +
+      "e\030\004 \001(\0132\013.TypedValue\"\231\001\n\nTypedValue\022\022\n\004t" +
+      "ype\030\001 \001(\0162\004.Rep\022\022\n\nbool_value\030\002 \001(\010\022\024\n\014s" +
+      "tring_value\030\003 \001(\t\022\024\n\014number_value\030\004 \001(\022\022" +
+      "\023\n\013bytes_value\030\005 \001(\014\022\024\n\014double_value\030\006 \001" +
+      "(\001\022\014\n\004null\030\007 \001(\010\"\246\002\n\031MetaDataOperationAr" +
+      "gument\022\024\n\014string_value\030\001 \001(\t\022\022\n\nbool_val" +
+      "ue\030\002 \001(\010\022\021\n\tint_value\030\003 \001(\021\022\033\n\023string_ar",
+      "ray_values\030\004 \003(\t\022\030\n\020int_array_values\030\005 \003" +
+      "(\021\0225\n\004type\030\006 \001(\0162\'.MetaDataOperationArgu" +
+      "ment.ArgumentType\"^\n\014ArgumentType\022\n\n\006STR" +
+      "ING\020\000\022\010\n\004BOOL\020\001\022\007\n\003INT\020\002\022\023\n\017REPEATED_STR" +
+      "ING\020\003\022\020\n\014REPEATED_INT\020\004\022\010\n\004NULL\020\005\"\260\001\n\nQu" +
+      "eryState\022\030\n\004type\030\001 \001(\0162\n.StateType\022\013\n\003sq" +
+      "l\030\002 \001(\t\022\036\n\002op\030\003 \001(\0162\022.MetaDataOperation\022" +
+      "(\n\004args\030\004 \003(\0132\032.MetaDataOperationArgumen" +
+      "t\022\020\n\010has_args\030\005 \001(\010\022\017\n\007has_sql\030\006 \001(\010\022\016\n\006" +
+      "has_op\030\007 \001(\010*\237\001\n\rStatementType\022\n\n\006SELECT",
+      "\020\000\022\n\n\006INSERT\020\001\022\n\n\006UPDATE\020\002\022\n\n\006DELETE\020\003\022\n" +
+      "\n\006UPSERT\020\004\022\t\n\005MERGE\020\005\022\r\n\tOTHER_DML\020\006\022\n\n\006" +
+      "CREATE\020\007\022\010\n\004DROP\020\010\022\t\n\005ALTER\020\t\022\r\n\tOTHER_D" +
+      "DL\020\n\022\010\n\004CALL\020\013*\342\003\n\003Rep\022\025\n\021PRIMITIVE_BOOL" +
+      "EAN\020\000\022\022\n\016PRIMITIVE_BYTE\020\001\022\022\n\016PRIMITIVE_C" +
+      "HAR\020\002\022\023\n\017PRIMITIVE_SHORT\020\003\022\021\n\rPRIMITIVE_" +
+      "INT\020\004\022\022\n\016PRIMITIVE_LONG\020\005\022\023\n\017PRIMITIVE_F" +
+      "LOAT\020\006\022\024\n\020PRIMITIVE_DOUBLE\020\007\022\013\n\007BOOLEAN\020" +
+      "\010\022\010\n\004BYTE\020\t\022\r\n\tCHARACTER\020\n\022\t\n\005SHORT\020\013\022\013\n" +
+      "\007INTEGER\020\014\022\010\n\004LONG\020\r\022\t\n\005FLOAT\020\016\022\n\n\006DOUBL",
+      "E\020\017\022\017\n\013BIG_INTEGER\020\031\022\017\n\013BIG_DECIMAL\020\032\022\021\n" +
+      "\rJAVA_SQL_TIME\020\020\022\026\n\022JAVA_SQL_TIMESTAMP\020\021" +
+      "\022\021\n\rJAVA_SQL_DATE\020\022\022\022\n\016JAVA_UTIL_DATE\020\023\022" +
+      "\017\n\013BYTE_STRING\020\024\022\n\n\006STRING\020\025\022\n\n\006NUMBER\020\026" +
+      "\022\n\n\006OBJECT\020\027\022\010\n\004NULL\020\030\022\t\n\005ARRAY\020\033\022\n\n\006STR" +
+      "UCT\020\034\022\014\n\010MULTISET\020\035*^\n\010Severity\022\024\n\020UNKNO" +
+      "WN_SEVERITY\020\000\022\022\n\016FATAL_SEVERITY\020\001\022\022\n\016ERR" +
+      "OR_SEVERITY\020\002\022\024\n\020WARNING_SEVERITY\020\003*\327\004\n\021" +
+      "MetaDataOperation\022\022\n\016GET_ATTRIBUTES\020\000\022\033\n" +
+      "\027GET_BEST_ROW_IDENTIFIER\020\001\022\020\n\014GET_CATALO",
+      "GS\020\002\022\036\n\032GET_CLIENT_INFO_PROPERTIES\020\003\022\031\n\025" +
+      "GET_COLUMN_PRIVILEGES\020\004\022\017\n\013GET_COLUMNS\020\005" +
+      "\022\027\n\023GET_CROSS_REFERENCE\020\006\022\025\n\021GET_EXPORTE" +
+      "D_KEYS\020\007\022\030\n\024GET_FUNCTION_COLUMNS\020\010\022\021\n\rGE" +
+      "T_FUNCTIONS\020\t\022\025\n\021GET_IMPORTED_KEYS\020\n\022\022\n\016" +
+      "GET_INDEX_INFO\020\013\022\024\n\020GET_PRIMARY_KEYS\020\014\022\031" +
+      "\n\025GET_PROCEDURE_COLUMNS\020\r\022\022\n\016GET_PROCEDU" +
+      "RES\020\016\022\026\n\022GET_PSEUDO_COLUMNS\020\017\022\017\n\013GET_SCH" +
+      "EMAS\020\020\022\031\n\025GET_SCHEMAS_WITH_ARGS\020\021\022\024\n\020GET" +
+      "_SUPER_TABLES\020\022\022\023\n\017GET_SUPER_TYPES\020\023\022\030\n\024",
+      "GET_TABLE_PRIVILEGES\020\024\022\016\n\nGET_TABLES\020\025\022\023" +
+      "\n\017GET_TABLE_TYPES\020\026\022\021\n\rGET_TYPE_INFO\020\027\022\014" +
+      "\n\010GET_UDTS\020\030\022\027\n\023GET_VERSION_COLUMNS\020\031*\"\n" +
+      "\tStateType\022\007\n\003SQL\020\000\022\014\n\010METADATA\020\001B\"\n org" +
+      ".apache.calcite.avatica.protob\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -18286,7 +18481,7 @@ package org.apache.calcite.avatica.proto;
     internal_static_Frame_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Frame_descriptor,
-        new java.lang.String[] { "Offset", "Done", "Rows", });
+        new java.lang.String[] { "Offset", "Done", "Rows", "UpdatedSignature", });
     internal_static_Row_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_Row_fieldAccessorTable = new

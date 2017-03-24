@@ -29,7 +29,7 @@ import java.util.NoSuchElementException;
  */
 public abstract class IteratorCursor<E> extends PositionedCursor<E> {
   private Position position = Position.BEFORE_START;
-  private final Iterator<E> iterator;
+  private Iterator<E> iterator;
   private E current = null;
 
   /**
@@ -74,11 +74,20 @@ public abstract class IteratorCursor<E> extends PositionedCursor<E> {
   }
 
   /** Are we positioned on a valid row? */
-  private enum Position {
+  public enum Position {
     CLOSED,
     BEFORE_START,
     OK,
     AFTER_END
+  }
+
+  public void cloneTo(IteratorCursor<E> iter) {
+    iter.position = this.position;
+    iter.current = this.current;
+  }
+
+  public Iterator<E> getIterator() {
+    return iterator;
   }
 }
 

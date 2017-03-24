@@ -86,7 +86,7 @@ public class ProtobufHandlerTest {
     List<Object> frameRows = new ArrayList<>();
     frameRows.add(new Object[] {true, "my_string"});
 
-    Meta.Frame frame = Frame.create(0, true, frameRows);
+    Meta.Frame frame = Frame.create(0, true, frameRows, null);
     RpcMetadataResponse metadata = new RpcMetadataResponse("localhost:8765");
     FetchResponse response = new FetchResponse(frame, false, false, metadata);
 

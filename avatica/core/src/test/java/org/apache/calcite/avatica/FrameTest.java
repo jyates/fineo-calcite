@@ -166,7 +166,7 @@ public class FrameTest {
     // Create a row with schema: [VARCHAR, INTEGER, DATE]
     List<Object> rows = Collections.<Object>singletonList(new Object[] {"string", Integer.MAX_VALUE,
         new Date().getTime()});
-    Meta.Frame frame = Meta.Frame.create(0, true, rows);
+    Meta.Frame frame = Meta.Frame.create(0, true, rows, null);
     // Convert it to a protobuf
     Common.Frame protoFrame = frame.toProto();
     assertEquals(1, protoFrame.getRowsCount());
@@ -186,7 +186,7 @@ public class FrameTest {
     // Create a row with schema: [VARCHAR, ARRAY]
     List<Object> rows = Collections.<Object>singletonList(new Object[] {"string",
         Arrays.asList(1, 2, 3)});
-    Meta.Frame frame = Meta.Frame.create(0, true, rows);
+    Meta.Frame frame = Meta.Frame.create(0, true, rows, null);
     // Convert it to a protobuf
     Common.Frame protoFrame = frame.toProto();
     assertEquals(1, protoFrame.getRowsCount());

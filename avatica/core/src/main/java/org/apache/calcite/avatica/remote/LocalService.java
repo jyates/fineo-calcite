@@ -143,7 +143,11 @@ public class LocalService implements Service {
         resultSet.connectionId, resultSet.statementId, null);
     final List<TypedValue> parameterValues = Collections.emptyList();
     final Iterable<Object> iterable = meta.createIterable(h, null,
-        resultSet.signature, parameterValues, resultSet.firstFrame);
+        resultSet.signature, parameterValues, resultSet.firstFrame, new Meta.ResetCursorCallback() {
+          @Override public void reset(Meta.Signature signatureUpdate) {
+            // noop - META reads are expected to maintain their shape
+          }
+        });
     final List<List<Object>> list = new ArrayList<>();
     return MetaImpl.collect(resultSet.signature.cursorFactory, iterable, list);
   }
